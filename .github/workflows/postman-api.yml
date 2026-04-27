@@ -28,7 +28,7 @@ jobs:
           node-version: '18'
 
       - name: Install Newman
-        run: npm install -g newman newman-reporter-htmlextra
+        run: npm install -g newman@latest newman-reporter-htmlextra@latest
 
       - name: Run SmartOLT Collection with Newman
         run: |
