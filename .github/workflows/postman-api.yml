@@ -1,0 +1,48 @@
+name: Run SmartOLT Postman Collection
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # Jalankan setiap hari pukul 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Bisa dijalankan manual dari GitHub
+
+jobs:
+  run-postman-collection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run SmartOLT Collection with Newman
+        run: |
+          newman run "https://api.getpostman.com/collections/6034668-25ef5a4b-f9da-4a68-9f16-cf9d888e10da?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+            --env-var "subdomain=${{ secrets.SMARTOLT_SUBDOMAIN }}" \
+            --reporters cli,htmlextra \
+            --reporter-htmlextra-export results/report.html \
+            --timeout-request 30000 \
+            --bail
+        continue-on-error: false
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: newman-report
+          path: results/report.html
