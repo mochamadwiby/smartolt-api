@@ -1,0 +1,739 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "SmartOLT API",
+    "description": "Complete SmartOLT API Collection for managing OLTs and ONUs. Includes authentication via X-Token header.\n\n## Authentication\n- Header: `X-Token: {{api_key}}`\n- Content-Type: `application/x-www-form-urlencoded`\n\n## Base URL\n`https://{{subdomain}}.smartolt.com/api`\n\n## Rate Limits\n- `get_all_onus_details`: Max 3 calls/hour\n- All \"Get All\" endpoints are rate-limited. Cache data instead of polling.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System",
+      "description": "System-level endpoints for OLT management",
+      "item": [
+        {
+          "name": "Get OLTs",
+          "description": "List all OLTs registered in SmartOLT. Returns names, IP addresses, telnet/SNMP ports, and unique IDs for each OLT.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/system/get_olts",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "system", "get_olts"]
+            },
+            "description": "Lists all OLTs with their details (name, IP, ports, ID)."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\"status\": true, \"olts\": [{\"id\": 1, \"name\": \"OLT-1\", \"ip\": \"192.168.1.100\", \"telnet_port\": 23, \"snmp_port\": 161}]}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ONU - Read",
+      "description": "Read-only endpoints to query ONU information and status",
+      "item": [
+        {
+          "name": "Get Unconfigured ONUs",
+          "description": "List all unconfigured ONUs across all OLTs. Optionally filter by serial number or ONU type.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/unconfigured_onus",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "unconfigured_onus"],
+              "query": [
+                { "key": "sn", "value": "", "description": "Filter by serial number (contains search)", "disabled": true },
+                { "key": "snonu_type", "value": "", "description": "Filter by ONU type (e.g., Huawei, Nokia, ZTE)", "disabled": true }
+              ]
+            },
+            "description": "Returns unprovisioned ONUs. Use sparingly due to rate limits."
+          }
+        },
+        {
+          "name": "Get Unconfigured ONUs for OLT",
+          "description": "List unconfigured ONUs for a specific OLT by its ID.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/unconfigured_onus_for_olt/1",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "unconfigured_onus_for_olt", ":oltId"],
+              "variable": [
+                { "key": "oltId", "value": "1", "description": "OLT ID (number)" }
+              ],
+              "query": [
+                { "key": "sn", "value": "", "description": "Filter by serial number", "disabled": true },
+                { "key": "snonu_type", "value": "", "description": "Filter by ONU type", "disabled": true }
+              ]
+            },
+            "description": "Returns unprovisioned ONUs for a specific OLT."
+          }
+        },
+        {
+          "name": "Get All ONUs Details",
+          "description": "⚠️ RATE LIMITED: Max 3 calls/hour. Returns full ONU database export. Cache results.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_all_onus_details",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_all_onus_details"],
+              "query": [
+                { "key": "olt_id", "value": "", "description": "Filter by OLT ID", "disabled": true },
+                { "key": "board", "value": "", "description": "Filter by board number", "disabled": true },
+                { "key": "port", "value": "", "description": "Filter by port number", "disabled": true },
+                { "key": "zone", "value": "", "description": "Filter by zone", "disabled": true }
+              ]
+            },
+            "description": "Full ONU database export. Cache this data — do not poll."
+          }
+        },
+        {
+          "name": "Get ONUs Signals",
+          "description": "Get signal levels (RX/TX power) for all ONUs. Optionally filter by OLT, board, port, or zone.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onus_signals",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onus_signals"],
+              "query": [
+                { "key": "olt_id", "value": "", "description": "Filter by OLT ID", "disabled": true },
+                { "key": "board", "value": "", "description": "Filter by board number", "disabled": true },
+                { "key": "port", "value": "", "description": "Filter by port number", "disabled": true },
+                { "key": "zone", "value": "", "description": "Filter by zone", "disabled": true }
+              ]
+            },
+            "description": "Returns optical signal levels for ONUs."
+          }
+        },
+        {
+          "name": "Get ONU Status",
+          "description": "Get online/offline status for a specific ONU by its external ID.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onu_status/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onu_status", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID (string)" }
+              ]
+            },
+            "description": "Check if an ONU is online or offline."
+          }
+        },
+        {
+          "name": "Get ONU Administrative Status",
+          "description": "Get administrative status (enabled/disabled) for a specific ONU.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onu_administrative_status/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onu_administrative_status", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID (string)" }
+              ]
+            },
+            "description": "Returns whether the ONU is administratively enabled or disabled."
+          }
+        },
+        {
+          "name": "Get ONU Full Status Info",
+          "description": "Get full detailed status information for an ONU including signal levels, configuration, and runtime data (returns text format).",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onu_full_status_info/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onu_full_status_info", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Returns comprehensive ONU status in text/table format."
+          }
+        },
+        {
+          "name": "Get ONU Speed Profiles",
+          "description": "Get current upload/download speed profile assignments for an ONU.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onu_speed_profiles/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onu_speed_profiles", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Returns current speed profile (bandwidth limits) for an ONU."
+          }
+        },
+        {
+          "name": "Get ONU Traffic Graph",
+          "description": "Get traffic graph image for an ONU. Returns image binary data.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/get_onu_traffic_graph/ONU-EXT-ID/hourly",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "get_onu_traffic_graph", ":onuExternalId", ":graphType"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" },
+                { "key": "graphType", "value": "hourly", "description": "Graph period: hourly, daily, weekly, monthly, or yearly" }
+              ]
+            },
+            "description": "Returns a traffic graph image for the specified period."
+          }
+        }
+      ]
+    },
+    {
+      "name": "ONU - Actions",
+      "description": "Write endpoints to provision, configure, and manage ONUs",
+      "item": [
+        {
+          "name": "Authorize ONU",
+          "description": "Provision a new ONU (authorize it on the OLT). This is the main endpoint for adding new subscribers.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "olt_id", "value": "1", "description": "OLT ID where ONU will be provisioned" },
+                { "key": "pon_type", "value": "gpon", "description": "PON type: gpon or epon" },
+                { "key": "sn", "value": "HWTCCXXXXXX", "description": "ONU Serial Number" },
+                { "key": "onu_type", "value": "HG8245W5", "description": "ONU model/type" },
+                { "key": "onu_mode", "value": "Routing", "description": "ONU mode: Routing or Bridging" },
+                { "key": "vlan", "value": "100", "description": "VLAN ID for the ONU" },
+                { "key": "zone", "value": "ZONE-1", "description": "Zone/area name" },
+                { "key": "name", "value": "Customer Name", "description": "Customer or ONU name" },
+                { "key": "board", "value": "", "description": "Board/slot number", "disabled": true },
+                { "key": "port", "value": "", "description": "PON port number", "disabled": true },
+                { "key": "cvlan", "value": "", "description": "Customer VLAN (for QinQ)", "disabled": true },
+                { "key": "svlan", "value": "", "description": "Service VLAN (for QinQ)", "disabled": true },
+                { "key": "tag_transform_mode", "value": "", "description": "default, translate, or translate-and-add", "disabled": true },
+                { "key": "onu_external_id", "value": "", "description": "Custom external ID for the ONU", "disabled": true },
+                { "key": "address_or_comment", "value": "", "description": "Installation address or comment", "disabled": true },
+                { "key": "odb", "value": "", "description": "Optical Distribution Box / splitter info", "disabled": true },
+                { "key": "upload_speed_profile_name", "value": "", "description": "Upload speed profile name", "disabled": true },
+                { "key": "download_speed_profile_name", "value": "", "description": "Download speed profile name", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/authorize_onu",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "authorize_onu"]
+            },
+            "description": "Provision a new ONU on the OLT with all required and optional parameters."
+          }
+        },
+        {
+          "name": "Set ONU Management IP DHCP",
+          "description": "Set ONU management IP to DHCP mode.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "vlan", "value": "100", "description": "Management VLAN" },
+                { "key": "cvlan", "value": "", "description": "Customer VLAN", "disabled": true },
+                { "key": "svlan", "value": "", "description": "Service VLAN", "disabled": true },
+                { "key": "tag_transform_mode", "value": "", "description": "Tag transform mode", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_onu_mgmt_ip_dhcp/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_onu_mgmt_ip_dhcp", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Configure ONU management IP to use DHCP."
+          }
+        },
+        {
+          "name": "Enable TR-069",
+          "description": "Enable TR-069 remote management on an ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "tr069_profile", "value": "default", "description": "TR-069 profile name (required)" }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/enable_tr069/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "enable_tr069", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Enable TR-069 ACS remote management on the ONU."
+          }
+        },
+        {
+          "name": "Set WAN Mode DHCP",
+          "description": "Set ONU WAN interface to DHCP mode.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "configuration_method", "value": "", "description": "Configuration method", "disabled": true },
+                { "key": "ip_protocol", "value": "", "description": "IPv4 or IPv6", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_onu_wan_mode_dhcp/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_onu_wan_mode_dhcp", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Set ONU WAN connection to DHCP."
+          }
+        },
+        {
+          "name": "Set WAN Mode PPPoE",
+          "description": "Set ONU WAN interface to PPPoE mode with username/password.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "user@isp.com", "description": "PPPoE username (required)" },
+                { "key": "password", "value": "secret", "description": "PPPoE password (required)" },
+                { "key": "configuration_method", "value": "", "description": "Configuration method", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_onu_wan_mode_pppoe/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_onu_wan_mode_pppoe", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Set ONU WAN connection to PPPoE with ISP credentials."
+          }
+        },
+        {
+          "name": "Update ONU Speed Profiles",
+          "description": "Update upload and download speed profiles (bandwidth limits) for an ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "upload_speed_profile_name", "value": "UPLOAD-100M", "description": "Upload speed profile name" },
+                { "key": "download_speed_profile_name", "value": "DOWNLOAD-100M", "description": "Download speed profile name" }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/update_onu_speed_profiles/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "update_onu_speed_profiles", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Change bandwidth speed profiles for an ONU."
+          }
+        },
+        {
+          "name": "Set Ethernet Port Transparent",
+          "description": "Set an ethernet port on the ONU to transparent (bridge) mode.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "ethernet_port", "value": "1", "description": "Ethernet port number (required)" },
+                { "key": "dhcp", "value": "", "description": "Enable DHCP", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_ethernet_port_transparent/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_ethernet_port_transparent", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Configure ethernet port in transparent/bridge mode."
+          }
+        },
+        {
+          "name": "Set WiFi Port LAN",
+          "description": "Set a WiFi port to LAN mode (internal network).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "wifi_port", "value": "1", "description": "WiFi port/SSID number (required)" },
+                { "key": "dhcp", "value": "", "description": "Enable DHCP", "disabled": true },
+                { "key": "ssid", "value": "", "description": "WiFi SSID name", "disabled": true },
+                { "key": "password", "value": "", "description": "WiFi password", "disabled": true },
+                { "key": "authentication_mode", "value": "", "description": "WPA2, WPA3, etc.", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_wifi_port_lan/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_wifi_port_lan", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Configure WiFi port in LAN mode."
+          }
+        },
+        {
+          "name": "Set WiFi Port Access",
+          "description": "Set a WiFi port to Access Point mode (external/public network) with VLAN.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "wifi_port", "value": "2", "description": "WiFi port/SSID number (required)" },
+                { "key": "vlan", "value": "200", "description": "VLAN for access network (required)" },
+                { "key": "dhcp", "value": "", "description": "Enable DHCP", "disabled": true },
+                { "key": "ssid", "value": "", "description": "WiFi SSID name", "disabled": true },
+                { "key": "password", "value": "", "description": "WiFi password", "disabled": true },
+                { "key": "authentication_mode", "value": "", "description": "WPA2, WPA3, etc.", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_wifi_port_access/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_wifi_port_access", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Configure WiFi port in Access Point mode with VLAN."
+          }
+        },
+        {
+          "name": "Shutdown WiFi Port",
+          "description": "Disable/shutdown a WiFi port on the ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "wifi_port", "value": "1", "description": "WiFi port number to disable (required)" }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/shutdown_wifi_port/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "shutdown_wifi_port", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Disable/disable a WiFi radio on the ONU."
+          }
+        },
+        {
+          "name": "Reboot ONU",
+          "description": "Reboot/restart a specific ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "body": { "mode": "urlencoded", "urlencoded": [] },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/reboot/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "reboot", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Reboot/restart the specified ONU."
+          }
+        },
+        {
+          "name": "Resync Config ONU",
+          "description": "Resync/reset configuration on an ONU. Forces the ONU to re-download its configuration.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "body": { "mode": "urlencoded", "urlencoded": [] },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/resync_config/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "resync_config", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Resync/reset ONU configuration. Forces config re-download."
+          }
+        },
+        {
+          "name": "Enable ONU",
+          "description": "Administratively enable an ONU (was previously disabled).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "body": { "mode": "urlencoded", "urlencoded": [] },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/enable/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "enable", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Administratively enable an ONU."
+          }
+        },
+        {
+          "name": "Disable ONU",
+          "description": "Administratively disable an ONU (blocks service without deleting).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "body": { "mode": "urlencoded", "urlencoded": [] },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/disable/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "disable", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Administratively disable an ONU (suspend service)."
+          }
+        },
+        {
+          "name": "Delete ONU",
+          "description": "Delete one or more ONUs. Supports comma-separated External IDs (max 10 per call).",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" }
+            ],
+            "body": { "mode": "urlencoded", "urlencoded": [] },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/delete/ONU-EXT-ID-1,ONU-EXT-ID-2",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "delete", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID-1,ONU-EXT-ID-2", "description": "Comma-separated ONU External IDs (max 10)" }
+              ]
+            },
+            "description": "Delete ONUs by external ID. Supports batch delete (comma-separated, max 10)."
+          }
+        },
+        {
+          "name": "Set ONU VoIP Enabled",
+          "description": "Enable VoIP mode on an ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "voip_attach_to", "value": "", "description": "VoIP attachment configuration", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/set_onu_voip_enabled/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "set_onu_voip_enabled", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Enable VoIP functionality on the ONU."
+          }
+        },
+        {
+          "name": "Enable ONU VoIP Port",
+          "description": "Enable a VoIP port on the ONU with phone number and SIP credentials.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "voip_port", "value": "1", "description": "VoIP port number (required)" },
+                { "key": "phone_number", "value": "+628123456789", "description": "Phone number (required)" },
+                { "key": "password", "value": "sipsecret", "description": "SIP password (required)" },
+                { "key": "sip_userid", "value": "", "description": "SIP user ID (optional)", "disabled": true },
+                { "key": "voip_profile_name", "value": "", "description": "VoIP profile name (optional)", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/enable_onu_voip_port/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "enable_onu_voip_port", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Activate a VoIP port with phone number and credentials."
+          }
+        },
+        {
+          "name": "Disable ONU VoIP Port",
+          "description": "Disable/deactivate a VoIP port on the ONU.",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Token", "value": "{{api_key}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded", "type": "text" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "voip_port", "value": "1", "description": "VoIP port number to disable (required)" }
+              ]
+            },
+            "url": {
+              "raw": "https://{{subdomain}}.smartolt.com/api/onu/disable_onu_voip_port/ONU-EXT-ID",
+              "protocol": "https",
+              "host": ["{{subdomain}}.smartolt.com"],
+              "path": ["api", "onu", "disable_onu_voip_port", ":onuExternalId"],
+              "variable": [
+                { "key": "onuExternalId", "value": "ONU-EXT-ID", "description": "ONU External ID" }
+              ]
+            },
+            "description": "Deactivate/disable a VoIP port on the ONU."
+          }
+        }
+      ]
+    }
+  ]
+}

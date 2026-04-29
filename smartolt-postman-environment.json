@@ -1,0 +1,17 @@
+{
+  "name": "SmartOLT API Environment",
+  "values": [
+    {
+      "key": "subdomain",
+      "value": "your-subdomain",
+      "type": "default",
+      "description": "SmartOLT subdomain (e.g., myisp from myisp.smartolt.com)"
+    },
+    {
+      "key": "api_key",
+      "value": "your-api-key-here",
+      "type": "secret",
+      "description": "SmartOLT API key (X-Token header). Get from SmartOLT dashboard."
+    }
+  ]
+}

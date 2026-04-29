@@ -1,0 +1,10 @@
+node_modules/
+results/
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# MCP config (contains API keys)
+mcp-config/
+opencode.json

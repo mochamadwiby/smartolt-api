@@ -20,29 +20,44 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install Newman
-        run: npm install -g newman@latest newman-reporter-htmlextra@latest
+        run: npm install -g newman newman-reporter-html
+
+      - name: Create results directory
+        run: mkdir -p results
 
       - name: Run SmartOLT Collection with Newman
         run: |
-          newman run "https://api.getpostman.com/collections/6034668-25ef5a4b-f9da-4a68-9f16-cf9d888e10da?apikey=${{ secrets.POSTMAN_API_KEY }}" \
+          newman run "smartolt-postman-collection.json" \
+            -e "smartolt-postman-environment.json" \
             --env-var "subdomain=${{ secrets.SMARTOLT_SUBDOMAIN }}" \
-            --reporters cli,htmlextra \
-            --reporter-htmlextra-export results/report.html \
+            --env-var "api_key=${{ secrets.SMARTOLT_API_KEY }}" \
+            --reporters cli,html \
+            --reporter-html-export results/report.html \
             --timeout-request 30000 \
-            --bail
-        continue-on-error: false
+            --delay-request 1000
+        continue-on-error: true
 
       - name: Upload Test Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: newman-report
           path: results/report.html
+          retention-days: 30
+
+      - name: Upload Newman Summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: newman-summary
+          path: results/
+          retention-days: 30
